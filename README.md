@@ -1,5 +1,19 @@
 # twilio-openai-realtime-call
 
+To install dependencies:
+
+```sh
+bun install
+```
+
+To run:
+
+```sh
+bun run dev
+```
+
+open http://localhost:3000
+
 ## References
 
 - [Build an AI Voice Assistant with Twilio Voice, OpenAI’s Realtime API, and Node.js | Twilio](https://www.twilio.com/en-us/blog/voice-ai-assistant-openai-realtime-api-node)
