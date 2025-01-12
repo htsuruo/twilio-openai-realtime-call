@@ -18,7 +18,13 @@ app.post('/incoming-call', async (c) => {
    * @see https://www.twilio.com/docs/voice/twiml
    */
   const twiml = new twilio.twiml.VoiceResponse()
-  twiml.say('こんにちは、これは自動音声応答です。')
+  twiml.say(
+    {
+      language: 'ja-JP',
+      voice: 'Polly.Mizuki',
+    },
+    'こんにちは、これは自動音声応答です。'
+  )
   c.header('Content-Type', 'text/xml')
   return c.text(twiml.toString())
 })
