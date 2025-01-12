@@ -6,13 +6,22 @@ To install dependencies:
 bun install
 ```
 
-To run:
+## Development
+
+ローカルサーバーを起動します:
 
 ```sh
 bun run dev
 ```
 
-open http://localhost:3000
+[ngrok](https://dashboard.ngrok.com/)を使ってローカルホストをhttps URLとしてプロキシし、Webhookで叩けるようにします。ngrokは開発者がローカルの開発サーバー（localhost）をインターネットに公開することを可能にするトンネリング/リバース・プロキシツールです。
+
+```sh
+# ngrok http --domain=[YOUR_DOMAIN] [転送先IP]
+ngrok http --domain=gladly-discrete-hound.ngrok-free.app http://localhost:3000
+```
+
+ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_taiki/articles/ngrok_domain)
 
 ## References
 
