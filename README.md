@@ -81,6 +81,25 @@ sequenceDiagram
 websocat ws://localhost:3000/ws
 ```
 
+## onMessageで受け取るTwilioの音声インプットデータの形式例
+
+ref. [Media Streams - WebSocket Messages | Twilio](https://www.twilio.com/docs/voice/media-streams/websocket-messages)
+
+```yaml
+{
+  "event": "media",
+  "sequenceNumber": "926",
+  "media": {
+    "track": "inbound",
+    "chunk": "925",
+    "timestamp": "18553",
+    "payload": "fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fg=="
+  },
+  "streamSid": "MZ893cd917cb56661c1c498970e1fe3e08"
+}
+
+```
+
 ## References
 
 - [Build an AI Voice Assistant with Twilio Voice, OpenAI’s Realtime API, and Node.js | Twilio](https://www.twilio.com/en-us/blog/voice-ai-assistant-openai-realtime-api-node)
@@ -90,3 +109,4 @@ websocat ws://localhost:3000/ws
 - [Realtime APIでAIが応答する電話窓口を実現。 技術部ブログ | 株式会社インターパーク Interpark., Co. Ltd.](https://www.interpark.co.jp/dev/p0503.htm)
 - [twilio-samples/live-translation-openai-realtime-api: Integrate AI-powered voice translation into a Twilio Flex contact center using our prebuilt starter app, enabling live conversations between agents and customers speaking different languages.](https://github.com/twilio-samples/live-translation-openai-realtime-api)
   - リアルタイム翻訳のTwilio公式サンプル
+- [Twilio Streamingデータを用いたユーザー発話へのリアルタイム音声処理 | 株式会社AI Shift](https://www.ai-shift.co.jp/techblog/2844)
