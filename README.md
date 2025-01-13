@@ -25,6 +25,40 @@ ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_
 
 ## Sequence Diagram
 
+```mermaid
+sequenceDiagram
+    participant Smartphone
+    participant Twilio
+    participant Server
+    participant OpenAI
+
+    Smartphone->>Twilio: Call Twilio Phone Number
+    activate Twilio
+    Twilio->>Server: HTTP POST /incoming-call (Webhook)
+    activate Server
+    Server->>Twilio: TwiML Response (<Connect><Stream>)
+    deactivate Server
+    Twilio->>Server: WebSocket Connection (Stream)
+    activate Server
+    loop Audio Stream (Twilio -> Server)
+        Twilio->>Server: WebSocket Frame (JSON: Start Event, base64 audio data, Stop Event)
+        Server->>OpenAI: Audio Data(OpenAI)
+        activate OpenAI
+        OpenAI->>Server: Text Response
+        deactivate OpenAI
+        Server->>OpenAI: Text Input
+        activate OpenAI
+        OpenAI->>Server: Audio Data(OpenAI)
+         deactivate OpenAI
+          Server->>Twilio:  WebSocket Frame (JSON: base64 audio data, StreamSid)
+    end
+    Server-->>Twilio:  Close WebSocket Connection
+    deactivate Server
+    Twilio-->>Smartphone: Play Audio Response
+
+    Twilio-->>Smartphone: Disconnect Call
+```
+
 ## WebSocketの動作確認方法
 
 [Websocat](https://github.com/vi/websocat)というコマンドラインでWebSocketの簡単な接続確立とメッセージ送受信ができるツールを使うのが楽です。
