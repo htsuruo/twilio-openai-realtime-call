@@ -11,8 +11,10 @@ const client = twilio(accountSid, authToken)
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>()
 
 // Webhookで自動応答を行うためのエンドポイント
+// TwilioからのHTTPリクエストを処理し、TwilioにTwiMLレスポンスを返却する
 // ref. https://www.twilio.com/docs/messaging/tutorials/how-to-receive-and-reply/node-js
 app.post('/incoming-call', async (c) => {
+  console.log('Incoming call received from Twilio')
   /**
    * Creates a new instance of Twilio's VoiceResponse object.
    * This object is used to generate TwiML (Twilio Markup Language) responses

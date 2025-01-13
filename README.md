@@ -59,6 +59,18 @@ sequenceDiagram
     Twilio-->>Smartphone: Disconnect Call
 ```
 
+### 処理の流れ
+
+1. クライアントからTwilioで発行した指定の電話番号へCall
+1. Twilio は着信をトリガーにWebhookが発火しサーバーエンドポイント`/incoming-call`が実行
+1. `/incoming-call`ではWebSocket URLを指定したTwiMLを作成しレスポンスを返却
+1. Twilio は、サーバーから受け取った TwiML レスポンスを解析
+    - `<Connect><Stream>` の検出: Twilio は`<Connect>`の中に`<Stream>`タグを見つけ、`<Stream>` 動詞の url 属性で指定された URL にWebSocket接続
+1. WebSocket 接続が成功すると、Twilio は通話中の音声データを継続的に WebSocket で`<Stream>`で指定したURLにメッセージを送信
+1. Twilioから受け取った音声データをOpenAI Realtime APIで処理し返答用の音声データを取得
+1. 返答用音声データをTwiML形式に変換することで、音声データが流れてくる度に自動応答が発話される（以下ループ）
+1. 通話が終了するか TwiML で終了指示があるとWebSocket接続は切れ通話は終了
+
 ## WebSocketの動作確認方法
 
 [Websocat](https://github.com/vi/websocat)というコマンドラインでWebSocketの簡単な接続確立とメッセージ送受信ができるツールを使うのが楽です。
