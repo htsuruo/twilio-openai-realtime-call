@@ -25,6 +25,16 @@ ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_
 
 ## Sequence Diagram
 
+## WebSocketの動作確認方法
+
+[Websocat](https://github.com/vi/websocat)というコマンドラインでWebSocketの簡単な接続確立とメッセージ送受信ができるツールを使うのが楽です。
+
+```sh
+# WebSocketのエンドポイントを指定し接続確立
+# その後接続確立している状態でターミナル上でメッセージを入力+Enter押下するとメッセージが送信される
+websocat ws://localhost:3000/ws
+```
+
 ## References
 
 - [Build an AI Voice Assistant with Twilio Voice, OpenAI’s Realtime API, and Node.js | Twilio](https://www.twilio.com/en-us/blog/voice-ai-assistant-openai-realtime-api-node)
