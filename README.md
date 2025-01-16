@@ -112,3 +112,4 @@ ref. [Media Streams - WebSocket Messages | Twilio](https://www.twilio.com/docs/v
 - [twilio-samples/live-translation-openai-realtime-api: Integrate AI-powered voice translation into a Twilio Flex contact center using our prebuilt starter app, enabling live conversations between agents and customers speaking different languages.](https://github.com/twilio-samples/live-translation-openai-realtime-api)
   - リアルタイム翻訳のTwilio公式サンプル
 - [Twilio Streamingデータを用いたユーザー発話へのリアルタイム音声処理 | 株式会社AI Shift](https://www.ai-shift.co.jp/techblog/2844)
+- [OpenAI の Realtime API で音声を使って任意の関数を実行する(Function calling編) | 豆蔵デベロッパーサイト](https://developer.mamezou-tech.com/blogs/2024/10/09/openai-realtime-api-function-calling/)

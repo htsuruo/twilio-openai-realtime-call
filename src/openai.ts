@@ -1,4 +1,5 @@
 import WebSocket from 'ws'
+import { endCall } from '.'
 import { LOG_EVENT_TYPES, SYSTEM_MESSAGE, VOICE } from './config'
 
 class OpenAIWebSocket {
@@ -28,6 +29,15 @@ class OpenAIWebSocket {
           voice: VOICE,
           instructions: SYSTEM_MESSAGE,
           temperature: 0.8,
+          tools: [
+            {
+              type: 'function',
+              name: 'endCall',
+              description:
+                'Terminates an active Twilio call. This function should be called when the conversation is finished or when the user has indicated that they want to end the call.',
+            },
+          ],
+          tool_choice: 'auto',
         },
       }
       this.ws.send(JSON.stringify(sessionUpdate))
@@ -64,8 +74,8 @@ class OpenAIWebSocket {
     }
   }
 
-  onmessage(streamSid: string, callback: (audioDelta: string) => void) {
-    this.ws.on('message', (data) => {
+  onmessage(sid: string, callback: (audioDelta: string) => void) {
+    this.ws.on('message', async (data) => {
       try {
         const response = JSON.parse(data as any)
         if (LOG_EVENT_TYPES.includes(response.type)) {
@@ -76,10 +86,22 @@ class OpenAIWebSocket {
         }
         if (response.type === 'response.audio.delta' && response.delta) {
           const audioDelta = this.convertToTwilioAudio(
-            streamSid!,
+            sid,
             Buffer.from(response.delta, 'base64').toString('base64')
           )
           callback(audioDelta)
+        }
+        if (response.type === 'response.output_item.done') {
+          const item = response.item
+          console.log(
+            `[response.output_item.done] item.type: ${item.type}, item.name: ${item.name}`
+          )
+          if (item.type === 'function_call') {
+            if (item.name === 'endCall') {
+              await endCall(sid)
+              this.close()
+            }
+          }
         }
       } catch (error) {
         console.error(

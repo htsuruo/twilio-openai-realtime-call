@@ -21,6 +21,7 @@ app.post('/outgoing-call', async (c) => {
     to: TO_PHONE_NUMBER,
     twiml: createTwiml(),
   })
+
   return c.json({ callSid: call.sid })
 })
 
@@ -69,7 +70,7 @@ app.get(
   '/ws',
   upgradeWebSocket((c) => {
     console.log('Client connected')
-    let streamSid: string | null = null
+    let sid: string | null = null
 
     const openAiWs = new OpenAIWebSocket()
 
@@ -85,9 +86,9 @@ app.get(
               openAiWs.appendAudioMessageIfOpen(data.media.payload)
               break
             case 'start':
-              streamSid = data.start.streamSid
-              console.log('Incoming stream has started', streamSid)
-              openAiWs.onmessage(streamSid!, (audioDelta) => {
+              sid = data.start.streamSid
+              console.log('Incoming stream has started', sid)
+              openAiWs.onmessage(sid!, (audioDelta) => {
                 ws.send(audioDelta)
               })
               break
@@ -99,13 +100,24 @@ app.get(
           console.error('Error parsing message:', error, 'Message:', data)
         }
       },
-      onClose: (event, ws) => {
+      onClose: (event) => {
         openAiWs.close()
         console.log(`Client disconnected:  ${event.type}`)
       },
     }
   })
 )
+
+export async function endCall(callSid: string) {
+  try {
+    await client.calls(callSid).update({
+      status: 'completed',
+    })
+    console.log(`Call ended successfully: ${callSid}`)
+  } catch (error) {
+    console.error(`Error ending call: ${callSid}`, error)
+  }
+}
 
 export default {
   fetch: app.fetch,
