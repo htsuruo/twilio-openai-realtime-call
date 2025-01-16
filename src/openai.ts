@@ -31,20 +31,18 @@ class OpenAIWebSocket {
         },
       }
       this.ws.send(JSON.stringify(sessionUpdate))
-      const conversationCreate = {
-        type: 'conversation.item.create',
-        item: {
-          type: 'message',
-          role: 'user',
-          content: [
-            {
-              type: 'input_text',
-              text: 'もしもし、こんにちは。',
-            },
-          ],
+
+      // オペレーターから会話が始まるように初期メッセージを指定
+      // `conversation.item.create`ではない点に注意
+      // 以下と全く同じ状況だった
+      // ref. https://community.openai.com/t/realtime-api-does-not-trigger-after-conversation-item-create-event/1079792
+      const initialMessage = {
+        type: 'response.create',
+        response: {
+          instructions: 'もしもし、こんにちは。',
         },
       }
-      this.ws.send(JSON.stringify(conversationCreate))
+      this.ws.send(JSON.stringify(initialMessage))
     }
   }
 

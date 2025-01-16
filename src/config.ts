@@ -47,4 +47,5 @@ export const LOG_EVENT_TYPES = [
   'input_audio_buffer.speech_stopped',
   'input_audio_buffer.speech_started',
   'session.created',
+  'response.create',
 ]
