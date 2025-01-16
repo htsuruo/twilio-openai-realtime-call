@@ -11,6 +11,16 @@ const authToken = process.env.TWILIO_AUTH_TOKEN
 const client = twilio(accountSid, authToken)
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>()
 
+app.post('/create-call', async (c) => {
+  const call = await client.calls.create({
+    from: '+16085995923',
+    to: process.env.TO_PHONE_NUMBER!,
+    twiml: createTwimlResponse(),
+  })
+  console.log(call.sid)
+  return c.json({ callSid: call.sid })
+})
+
 // Webhookで自動応答を行うためのエンドポイント
 // TwilioからのHTTPリクエストを処理し、TwilioにTwiMLレスポンスを返却する
 // ref. https://www.twilio.com/docs/messaging/tutorials/how-to-receive-and-reply/node-js
