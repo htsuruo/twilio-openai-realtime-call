@@ -3,16 +3,9 @@ import { Hono } from 'hono'
 import { createBunWebSocket } from 'hono/bun'
 import twilio from 'twilio'
 import VoiceResponse from 'twilio/lib/twiml/VoiceResponse'
-import {
-  FROM_PHONE_NUMBER,
-  LOG_EVENT_TYPES,
-  PORT,
-  SYSTEM_MESSAGE,
-  TO_PHONE_NUMBER,
-  VOICE,
-} from './config'
+import { FROM_PHONE_NUMBER, PORT, TO_PHONE_NUMBER } from './config'
 
-import WebSocket from 'ws'
+import OpenAIWebSocket from './openai'
 const app = new Hono()
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID
@@ -78,85 +71,25 @@ app.get(
     console.log('Client connected')
     let streamSid: string | null = null
 
-    const openAiWs = new WebSocket(
-      'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17',
-      {
-        headers: {
-          Authorization: 'Bearer ' + process.env.OPENAI_API_KEY,
-          'OpenAI-Beta': 'realtime=v1',
-        },
-      }
-    )
+    const openAiWs = new OpenAIWebSocket()
 
     return {
-      onOpen: (event, ws) => {
+      onOpen: (event) => {
         console.log(`Connected to WebSocket Server: ${event.type}`)
-
-        openAiWs.on('open', () => {
-          console.log('Connected to the OpenAI Realtime API')
-          setTimeout(() => {
-            const sessionUpdate = {
-              type: 'session.update',
-              session: {
-                turn_detection: { type: 'server_vad' },
-                input_audio_format: 'g711_ulaw',
-                output_audio_format: 'g711_ulaw',
-                voice: VOICE,
-                instructions: SYSTEM_MESSAGE,
-                modalities: ['text', 'audio'],
-                temperature: 0.8,
-              },
-            }
-            console.log(
-              'Sending session update:',
-              JSON.stringify(sessionUpdate)
-            )
-            openAiWs.send(JSON.stringify(sessionUpdate))
-          }, 250)
-        })
-
-        openAiWs.on('message', (data) => {
-          try {
-            const response = JSON.parse(data as any)
-            if (LOG_EVENT_TYPES.includes(response.type)) {
-              console.log(`Received event: ${response.type}`, response)
-            }
-            if (response.type === 'session.updated') {
-              console.log('Session updated successfully:', response)
-            }
-            if (response.type === 'response.audio.delta' && response.delta) {
-              const audioDelta = convertToTwilioAudio(
-                streamSid!,
-                Buffer.from(response.delta, 'base64').toString('base64')
-              )
-              ws.send(audioDelta)
-            }
-          } catch (error) {
-            console.error(
-              'Error processing OpenAI message:',
-              error,
-              'Raw message:',
-              data
-            )
-          }
-        })
       },
       onMessage: async (event, ws) => {
         const data = JSON.parse(event.data as any)
         try {
           switch (data.event) {
             case 'media':
-              if (openAiWs.readyState === WebSocket.OPEN) {
-                const audioAppend = {
-                  type: 'input_audio_buffer.append',
-                  audio: data.media.payload,
-                }
-                openAiWs.send(JSON.stringify(audioAppend))
-              }
+              openAiWs.appendAudioMessageIfOpen(data.media.payload)
               break
             case 'start':
               streamSid = data.start.streamSid
               console.log('Incoming stream has started', streamSid)
+              openAiWs.onmessage(streamSid!, (audioDelta) => {
+                ws.send(audioDelta)
+              })
               break
             default:
               console.log('Received non-media event:', data.event)
@@ -167,28 +100,12 @@ app.get(
         }
       },
       onClose: (event, ws) => {
-        if (openAiWs.readyState === WebSocket.OPEN) openAiWs.close()
+        openAiWs.close()
         console.log(`Client disconnected:  ${event.type}`)
       },
     }
   })
 )
-
-/**
- * Converts the given stream SID and payload into a Twilio audio response.
- *
- * @param streamSid - The unique identifier for the Twilio stream.
- * @param payload - The media payload to be included in the response.
- * @returns A JSON string representing the Twilio audio response.
- */
-function convertToTwilioAudio(streamSid: string, payload: string): string {
-  const response = {
-    event: 'media',
-    streamSid,
-    media: { payload },
-  }
-  return JSON.stringify(response)
-}
 
 export default {
   fetch: app.fetch,
