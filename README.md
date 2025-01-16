@@ -1,5 +1,7 @@
 # twilio-openai-realtime-call
 
+> The App opens up Speech to Speech (S2S) capabilities for their GPT-4o multimodal model, which supports direct audio input and output – avoiding translating back and forth from text with a speech-to-text (SST) or text-to-speech (TTS) step.
+
 To install dependencies:
 
 ```sh
