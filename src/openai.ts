@@ -25,9 +25,6 @@ class OpenAIWebSocket {
           turn_detection: { type: 'server_vad' },
           input_audio_format: 'g711_ulaw',
           output_audio_format: 'g711_ulaw',
-          input_audio_transcription: {
-            model: 'whisper-1',
-          },
           voice: VOICE,
           instructions: SYSTEM_MESSAGE,
           temperature: 0.8,
