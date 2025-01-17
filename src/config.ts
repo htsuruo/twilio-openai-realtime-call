@@ -36,7 +36,6 @@ export const SYSTEM_MESSAGE = `
   お客様:  "はい"
   あなた:  "はい、ではまたよろしくお願いいたします！"
 `
-export const VOICE = 'coral'
 export const PORT = process.env.PORT || 3000
 
 export const FROM_PHONE_NUMBER = process.env.FROM_PHONE_NUMBER!

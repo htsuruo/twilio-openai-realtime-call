@@ -1,5 +1,5 @@
 import WebSocket from 'ws'
-import { LOG_EVENT_TYPES, SYSTEM_MESSAGE, VOICE } from './config'
+import { LOG_EVENT_TYPES, SYSTEM_MESSAGE } from './config'
 
 class OpenAIWebSocket {
   private readonly ws: WebSocket
@@ -27,7 +27,7 @@ class OpenAIWebSocket {
           turn_detection: { type: 'server_vad' },
           input_audio_format: 'g711_ulaw',
           output_audio_format: 'g711_ulaw',
-          voice: VOICE,
+          voice: 'coral',
           instructions: SYSTEM_MESSAGE,
           temperature: 0.8,
           tools: [
@@ -77,7 +77,7 @@ class OpenAIWebSocket {
   onmessage(
     streamSid: string,
     callback: (audioDelta: string) => void,
-    endCall: () => Promise<void>
+    endCallFunc: () => Promise<void>
   ) {
     this.ws.on('message', async (data) => {
       try {
@@ -102,7 +102,22 @@ class OpenAIWebSocket {
           )
           if (item.type === 'function_call') {
             if (item.name === this.endCallName) {
-              await endCall()
+              // TODO(htsuruo): 通話終了のconversationが機能しない問題
+              const event = {
+                type: 'conversation.item.create',
+                item: {
+                  type: 'message',
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'input_text',
+                      text: 'ありがとうございました。それでは、失礼いたします。',
+                    },
+                  ],
+                },
+              }
+              this.ws.send(JSON.stringify(event))
+              await endCallFunc()
             }
           }
         }

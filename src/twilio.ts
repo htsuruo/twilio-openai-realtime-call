@@ -20,6 +20,7 @@ class TwilioService {
       from: FROM_PHONE_NUMBER,
       to: TO_PHONE_NUMBER,
       twiml: this.createTwiml(),
+      record: true,
     })
   }
 

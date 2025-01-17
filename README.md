@@ -113,3 +113,5 @@ ref. [Media Streams - WebSocket Messages | Twilio](https://www.twilio.com/docs/v
   - リアルタイム翻訳のTwilio公式サンプル
 - [Twilio Streamingデータを用いたユーザー発話へのリアルタイム音声処理 | 株式会社AI Shift](https://www.ai-shift.co.jp/techblog/2844)
 - [OpenAI の Realtime API で音声を使って任意の関数を実行する(Function calling編) | 豆蔵デベロッパーサイト](https://developer.mamezou-tech.com/blogs/2024/10/09/openai-realtime-api-function-calling/)
+- [Transcribe Phone Calls in Real-Time using Node.js with AssemblyAI, and Twilio | Twilio](https://www.twilio.com/en-us/blog/phone-call-transcription-assemblyai-twilio-node)
+  - AssemblyAIを使った通話の文字起こし
