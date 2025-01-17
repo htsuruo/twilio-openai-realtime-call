@@ -7,9 +7,9 @@ class OpenAIWebSocket {
 
   constructor() {
     const url =
-      // 'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17'
-      // 一旦費用面が気になるのでgpt-4o-miniに変更
-      'wss://api.openai.com/v1/realtime?model=gpt-4o-mini-realtime-preview-2024-12-17'
+      'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17'
+    // 一旦費用面が気になるのでgpt-4o-miniに変更
+    // 'wss://api.openai.com/v1/realtime?model=gpt-4o-mini-realtime-preview-2024-12-17'
     this.ws = new WebSocket(url, {
       headers: {
         Authorization: 'Bearer ' + process.env.OPENAI_API_KEY,
@@ -57,7 +57,7 @@ class OpenAIWebSocket {
   }
 
   isOpen = () => this.ws.readyState === WebSocket.OPEN
-  appendAudioMessageIfOpen(audio: string) {
+  appendAudioMessage(audio: string) {
     if (this.isOpen()) {
       const audioAppend = {
         type: 'input_audio_buffer.append',
