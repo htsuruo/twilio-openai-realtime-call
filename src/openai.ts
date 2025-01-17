@@ -29,6 +29,7 @@ class OpenAIWebSocket {
           output_audio_format: 'g711_ulaw',
           voice: 'coral',
           instructions: SYSTEM_MESSAGE,
+          input_audio_transcription: { model: 'whisper-1' },
           temperature: 0.8,
           tools: [
             {
@@ -95,6 +96,14 @@ class OpenAIWebSocket {
           )
           callback(audioDelta)
         }
+        // トランスクリプトを取得（事前にsession.updateでinput_audio_transcriptionを指定が必要）
+        // ref. https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/input_audio_transcription
+        if (
+          response.type ===
+          'conversation.item.input_audio_transcription.completed'
+        ) {
+          console.log(`transcription: ${response.transcription}`)
+        }
         if (response.type === 'response.output_item.done') {
           const item = response.item
           console.log(
@@ -102,7 +111,7 @@ class OpenAIWebSocket {
           )
           if (item.type === 'function_call') {
             if (item.name === this.endCallName) {
-              // TODO(htsuruo): 通話終了のconversationが機能しない問題
+              // TODO(htsuruo): コール終了前に最後のメッセージを送信したいが発話されない
               const event = {
                 type: 'conversation.item.create',
                 item: {
@@ -116,7 +125,9 @@ class OpenAIWebSocket {
                   ],
                 },
               }
+              // conversation.item.createだけでは発話されず、response.createを送信する必要がある(?)
               this.ws.send(JSON.stringify(event))
+              this.ws.send(JSON.stringify({ type: 'response.create' }))
               await endCallFunc()
             }
           }
