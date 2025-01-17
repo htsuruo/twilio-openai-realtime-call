@@ -83,6 +83,15 @@ sequenceDiagram
 websocat ws://localhost:3000/ws
 ```
 
+## 料金
+
+[KDDIが2023年に代理店契約終了した](https://kwcplus.kddi-web.com/notice/termination-of-serviceprovision)ことにより色々と使いづらくなってしまった見たい。Twilio API使ってアプリケーション開発する際に利用する[Programmable Voice](https://www.twilio.com/docs/voice)だが、Outbound/Inboundそれぞれで価格表が公開されている。
+
+参考までに日本国内のスマートフォンで080,090番号を使ってOutbound(Outgoing Call)をすると、1分あたり$28と高額請求される。Twilioの発信元は米国とスゥエーデンあたりしか選べる国際ローミングなどの追加料金がかかっているのかもしれない。
+![Image](https://github.com/user-attachments/assets/ae48b9ce-4db9-4ba0-9b95-4d0f00142784)
+
+実際、累計60分の通話で$28 *60 = 1,680円（1USD≒156円換算）の請求が発生した。
+
 ## onMessageで受け取るTwilioの音声インプットデータの形式例
 
 ref. [Media Streams - WebSocket Messages | Twilio](https://www.twilio.com/docs/voice/media-streams/websocket-messages)
