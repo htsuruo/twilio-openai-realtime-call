@@ -1,9 +1,10 @@
 import WebSocket from 'ws'
-import { endCall } from '.'
 import { LOG_EVENT_TYPES, SYSTEM_MESSAGE, VOICE } from './config'
 
 class OpenAIWebSocket {
   private readonly ws: WebSocket
+  private readonly endCallName = 'end_call'
+
   constructor() {
     const url =
       // 'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17'
@@ -32,12 +33,11 @@ class OpenAIWebSocket {
           tools: [
             {
               type: 'function',
-              name: 'endCall',
+              name: this.endCallName,
               description:
-                'Terminates an active Twilio call. This function should be called when the conversation is finished or when the user has indicated that they want to end the call.',
+                'Terminates an active Twilio call. This function should be called when the conversation is finished or when the user has indicated that they want to end the call. Call this function when the user says phrases like "end the call", "hang up", "terminate the call", or expresses clear intent to stop the conversation.',
             },
           ],
-          tool_choice: 'auto',
         },
       }
       this.ws.send(JSON.stringify(sessionUpdate))
@@ -74,7 +74,11 @@ class OpenAIWebSocket {
     }
   }
 
-  onmessage(sid: string, callback: (audioDelta: string) => void) {
+  onmessage(
+    streamSid: string,
+    callback: (audioDelta: string) => void,
+    endCall: () => Promise<void>
+  ) {
     this.ws.on('message', async (data) => {
       try {
         const response = JSON.parse(data as any)
@@ -86,7 +90,7 @@ class OpenAIWebSocket {
         }
         if (response.type === 'response.audio.delta' && response.delta) {
           const audioDelta = this.convertToTwilioAudio(
-            sid,
+            streamSid,
             Buffer.from(response.delta, 'base64').toString('base64')
           )
           callback(audioDelta)
@@ -97,9 +101,8 @@ class OpenAIWebSocket {
             `[response.output_item.done] item.type: ${item.type}, item.name: ${item.name}`
           )
           if (item.type === 'function_call') {
-            if (item.name === 'endCall') {
-              await endCall(sid)
-              this.close()
+            if (item.name === this.endCallName) {
+              await endCall()
             }
           }
         }

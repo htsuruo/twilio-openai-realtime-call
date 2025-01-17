@@ -21,7 +21,6 @@ app.post('/outgoing-call', async (c) => {
     to: TO_PHONE_NUMBER,
     twiml: createTwiml(),
   })
-
   return c.json({ callSid: call.sid })
 })
 
@@ -42,7 +41,7 @@ app.post('/incoming-call', async (c) => {
  *
  * @see https://www.twilio.com/docs/voice/twiml
  */
-function createTwiml() {
+function createTwiml(): VoiceResponse {
   const response = new twilio.twiml.VoiceResponse()
   // 通話開始のシステムメッセージ
   setSystemMessage(response, 'こんにちは。オペレーターにお繋ぎします。')
@@ -70,7 +69,8 @@ app.get(
   '/ws',
   upgradeWebSocket((c) => {
     console.log('Client connected')
-    let sid: string | null = null
+    console.log('Call SID:', c.req.query('callSid'))
+    let streamSid: string | null = null
 
     const openAiWs = new OpenAIWebSocket()
 
@@ -86,11 +86,21 @@ app.get(
               openAiWs.appendAudioMessageIfOpen(data.media.payload)
               break
             case 'start':
-              sid = data.start.streamSid
-              console.log('Incoming stream has started', sid)
-              openAiWs.onmessage(sid!, (audioDelta) => {
-                ws.send(audioDelta)
-              })
+              streamSid = data.start.streamSid
+              const callSid = data.start.callSid
+              console.log('Incoming stream has started', streamSid)
+              openAiWs.onmessage(
+                streamSid!,
+                (audioDelta) => {
+                  ws.send(audioDelta)
+                },
+                async () => {
+                  const success = await endCall(callSid)
+                  if (success) {
+                    ws.close()
+                  }
+                }
+              )
               break
             default:
               console.log('Received non-media event:', data.event)
@@ -108,14 +118,16 @@ app.get(
   })
 )
 
-export async function endCall(callSid: string) {
+export async function endCall(callSid: string): Promise<Boolean> {
   try {
     await client.calls(callSid).update({
       status: 'completed',
     })
     console.log(`Call ended successfully: ${callSid}`)
+    return true
   } catch (error) {
     console.error(`Error ending call: ${callSid}`, error)
+    return false
   }
 }
 
