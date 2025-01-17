@@ -70,7 +70,6 @@ app.get(
   upgradeWebSocket((c) => {
     console.log('Client connected')
     console.log('Call SID:', c.req.query('callSid'))
-    let streamSid: string | null = null
 
     const openAiWs = new OpenAIWebSocket()
 
@@ -86,8 +85,7 @@ app.get(
               openAiWs.appendAudioMessageIfOpen(data.media.payload)
               break
             case 'start':
-              streamSid = data.start.streamSid
-              const callSid = data.start.callSid
+              const { streamSid, callSid } = data.start
               console.log('Incoming stream has started', streamSid)
               openAiWs.onmessage(
                 streamSid!,
