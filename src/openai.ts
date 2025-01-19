@@ -1,9 +1,20 @@
 import WebSocket from 'ws'
-import { LOG_EVENT_TYPES, SYSTEM_MESSAGE } from './config'
+import { SYSTEM_MESSAGE } from './prompt'
 
 class OpenAIWebSocket {
   private readonly ws: WebSocket
-  private readonly endCallName = 'end_call'
+  private readonly END_CALL_NAME = 'end_call'
+
+  private readonly LOG_EVENT_TYPES = [
+    'response.content.done',
+    'rate_limits.updated',
+    'response.done',
+    'input_audio_buffer.committed',
+    'input_audio_buffer.speech_stopped',
+    'input_audio_buffer.speech_started',
+    'session.created',
+    'response.create',
+  ]
 
   constructor() {
     const url =
@@ -29,12 +40,12 @@ class OpenAIWebSocket {
           output_audio_format: 'g711_ulaw',
           voice: 'coral',
           instructions: SYSTEM_MESSAGE,
-          input_audio_transcription: { model: 'whisper-1' },
+          // input_audio_transcription: { model: 'whisper-1' },
           temperature: 0.8,
           tools: [
             {
               type: 'function',
-              name: this.endCallName,
+              name: this.END_CALL_NAME,
               description:
                 'Terminates an active Twilio call. This function should be called when the conversation is finished or when the user has indicated that they want to end the call. Call this function when the user says phrases like "end the call", "hang up", "terminate the call", or expresses clear intent to stop the conversation.',
             },
@@ -83,7 +94,7 @@ class OpenAIWebSocket {
     this.ws.on('message', async (data) => {
       try {
         const response = JSON.parse(data as any)
-        if (LOG_EVENT_TYPES.includes(response.type)) {
+        if (this.LOG_EVENT_TYPES.includes(response.type)) {
           console.log(`Received event: ${response.type}`, response)
         }
         if (response.type === 'session.updated') {
@@ -98,19 +109,19 @@ class OpenAIWebSocket {
         }
         // トランスクリプトを取得（事前にsession.updateでinput_audio_transcriptionを指定が必要）
         // ref. https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/input_audio_transcription
-        if (
-          response.type ===
-          'conversation.item.input_audio_transcription.completed'
-        ) {
-          console.log(`transcription: ${response.transcription}`)
-        }
+        // if (
+        //   response.type ===
+        //   'conversation.item.input_audio_transcription.completed'
+        // ) {
+        //   console.log(`transcription: ${response.transcription}`)
+        // }
         if (response.type === 'response.output_item.done') {
           const item = response.item
           console.log(
             `[response.output_item.done] item.type: ${item.type}, item.name: ${item.name}`
           )
           if (item.type === 'function_call') {
-            if (item.name === this.endCallName) {
+            if (item.name === this.END_CALL_NAME) {
               // TODO(htsuruo): コール終了前に最後のメッセージを送信したいが発話されない
               const event = {
                 type: 'conversation.item.create',

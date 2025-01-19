@@ -1,10 +1,12 @@
 import twilio from 'twilio'
 import { CallInstance } from 'twilio/lib/rest/api/v2010/account/call'
 import VoiceResponse from 'twilio/lib/twiml/VoiceResponse'
-import { FROM_PHONE_NUMBER, TO_PHONE_NUMBER } from './config'
 
 class TwilioService {
   private readonly client: twilio.Twilio
+  // TODO(htsuruo): ENVで切り替える
+  private readonly API_DOMAIN = 'gladly-discrete-hound.ngrok-free.app'
+
   constructor() {
     const accountSid = process.env.TWILIO_ACCOUNT_SID
     const authToken = process.env.TWILIO_AUTH_TOKEN
@@ -16,9 +18,17 @@ class TwilioService {
   private static _instance: TwilioService | undefined
 
   async createCall(): Promise<CallInstance> {
+    const from = process.env.FROM_PHONE_NUMBER
+    const to = process.env.TO_PHONE_NUMBER
+    if (!from || !to) {
+      throw new Error(
+        'FROM_PHONE_NUMBER and TO_PHONE_NUMBER must be set in the environment'
+      )
+    }
+
     return this.client.calls.create({
-      from: FROM_PHONE_NUMBER,
-      to: TO_PHONE_NUMBER,
+      from,
+      to,
       twiml: this.createTwiml(),
       record: true,
     })
@@ -37,7 +47,7 @@ class TwilioService {
     this.setSystemMessage(response, 'こんにちは。オペレーターにお繋ぎします。')
     const connect = response.connect()
     connect.stream({
-      url: 'wss://gladly-discrete-hound.ngrok-free.app/ws',
+      url: `wss://${this.API_DOMAIN}/ws`,
     })
     // 通話終了のシステムメッセージ
     this.setSystemMessage(response, '以上でオペレーターとの通話を終了します。')

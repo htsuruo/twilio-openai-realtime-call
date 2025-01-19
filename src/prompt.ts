@@ -36,17 +36,3 @@ export const SYSTEM_MESSAGE = `
   お客様:  "はい"
   あなた:  "はい、ではまたよろしくお願いいたします！"
 `
-export const PORT = process.env.PORT || 3000
-
-export const FROM_PHONE_NUMBER = process.env.FROM_PHONE_NUMBER!
-export const TO_PHONE_NUMBER = process.env.TO_PHONE_NUMBER!
-export const LOG_EVENT_TYPES = [
-  'response.content.done',
-  'rate_limits.updated',
-  'response.done',
-  'input_audio_buffer.committed',
-  'input_audio_buffer.speech_stopped',
-  'input_audio_buffer.speech_started',
-  'session.created',
-  'response.create',
-]

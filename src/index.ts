@@ -1,7 +1,6 @@
 import type { ServerWebSocket } from 'bun'
 import { Hono } from 'hono'
 import { createBunWebSocket } from 'hono/bun'
-import { PORT } from './config'
 
 import OpenAIWebSocket from './openai'
 import TwilioService from './twilio'
@@ -82,5 +81,5 @@ app.get(
 export default {
   fetch: app.fetch,
   websocket,
-  port: PORT,
+  port: process.env.PORT || 3000,
 }
