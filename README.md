@@ -103,6 +103,12 @@ websocat ws://localhost:3000/ws
 
 WebSocketの接続が確立している状態（`onopen`な状態）であればCloud Runはアクティブとに見なされるため、リクエストタイムアウトの設定時間まではインスタンスが残り続けます（その分[課金](https://cloud.google.com/run/pricing?hl=ja#billable-time)は発生します）。記載の通り**最大60分、デフォルトは5分**です。
 
+デプロイは適切なGoogle Cloudアカウントの設定が済んでいる前提であれば以下のみで完了です:
+
+```bash
+bun run deploy
+```
+
 ## 料金
 
 [KDDIが2023年に代理店契約終了した](https://kwcplus.kddi-web.com/notice/termination-of-serviceprovision)ことにより色々と使いづらくなってしまった見たい。Twilio API使ってアプリケーション開発する際に利用する[Programmable Voice](https://www.twilio.com/docs/voice)だが、Outbound/Inboundそれぞれで価格表が公開されている。
