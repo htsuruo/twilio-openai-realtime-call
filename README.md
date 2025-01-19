@@ -2,10 +2,22 @@
 
 > The App opens up Speech to Speech (S2S) capabilities for their GPT-4o multimodal model, which supports direct audio input and output – avoiding translating back and forth from text with a speech-to-text (SST) or text-to-speech (TTS) step.
 
+## Setup
+
 To install dependencies:
 
 ```sh
 bun install
+```
+
+以下の環境変数を定義した`.env`を作成します（`direnv`を利用している場合は`.envrc`に`dotenv`のみを記載します）。
+
+```language
+TWILIO_ACCOUNT_SID="YOUR_ACCOUNT_SID"
+TWILIO_AUTH_TOKEN="YOUR_AUTH_TOKEN"
+OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+TO_PHONE_NUMBER="YOUR_TO_PHONE_NUMBER"
+FROM_PHONE_NUMBER="YOUR_FROM_PHONE_NUMBER"
 ```
 
 ## Development
