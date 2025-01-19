@@ -87,12 +87,11 @@ sequenceDiagram
 
 ## WebSocketの動作確認方法
 
-[Websocat](https://github.com/vi/websocat)というコマンドラインでWebSocketの簡単な接続確立とメッセージ送受信ができるツールを使うのが楽です。
+PostmanでWebSocketリクエストを試すことができます:
+ref. [Send WebSocket requests with Postman | Postman Docs](https://learning.postman.com/docs/sending-requests/websocket/websocket-overview/)
 
-```sh
-# WebSocketのエンドポイントを指定し接続確立
-# その後接続確立している状態でターミナル上でメッセージを入力+Enter押下するとメッセージが送信される
-websocat ws://localhost:3000/ws
+```bash
+ws://localhost:3000/ws
 ```
 
 ## Deploy
