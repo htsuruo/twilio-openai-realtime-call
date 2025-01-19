@@ -2,7 +2,8 @@
 
 > The App opens up Speech to Speech (S2S) capabilities for their GPT-4o multimodal model, which supports direct audio input and output – avoiding translating back and forth from text with a speech-to-text (SST) or text-to-speech (TTS) step.
 
-- Package Manager, Runtime: [Bun](https://bun.sh/)(v1.1.43)
+- [Bun](https://bun.sh/)(v1.1.43)
+  - JavaScript Runtime, Package Manager, Bundler
 - Server Framework: [Hono](https://hono.dev/)
 - Hosting: [Cloud Run](https://cloud.google.com/run?hl=en)
 
