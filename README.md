@@ -13,7 +13,7 @@ bun install
 ローカルサーバーを起動します:
 
 ```sh
-bun run dev
+bun a dev
 ```
 
 [ngrok](https://dashboard.ngrok.com/)を使ってローカルホストをhttps URLとしてプロキシし、Webhookで叩けるようにします。ngrokは開発者がローカルの開発サーバー（localhost）をインターネットに公開することを可能にするトンネリング/リバース・プロキシツールです。
@@ -82,6 +82,14 @@ sequenceDiagram
 # その後接続確立している状態でターミナル上でメッセージを入力+Enter押下するとメッセージが送信される
 websocat ws://localhost:3000/ws
 ```
+
+## Deploy
+
+サーバーレスでは[Cloud RunがWebSocketに対応している](https://cloud.google.com/run/docs/triggering/websockets?hl=ja)のでコンテナ化してデプロイするのが低価格かつ楽な方法だと思います。
+
+> WebSocket リクエストは、Cloud Run で長時間実行される HTTP リクエストとして扱われます。アプリケーション サーバーがタイムアウトを適用しない場合でも、リクエスト タイムアウトの影響を受けます（最大 60 分、デフォルトは 5 分）。
+
+WebSocketの接続が確立している状態（`onopen`な状態）であればCloud Runはアクティブとに見なされるため、リクエストタイムアウトの設定時間まではインスタンスが残り続けます（その分[課金](https://cloud.google.com/run/pricing?hl=ja#billable-time)は発生します）。記載の通り**最大60分、デフォルトは5分**です。
 
 ## 料金
 
