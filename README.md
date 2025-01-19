@@ -2,6 +2,10 @@
 
 > The App opens up Speech to Speech (S2S) capabilities for their GPT-4o multimodal model, which supports direct audio input and output – avoiding translating back and forth from text with a speech-to-text (SST) or text-to-speech (TTS) step.
 
+- Package Manager, Runtime: [Bun](https://bun.sh/)(v1.1.43)
+- Server Framework: [Hono](https://hono.dev/)
+- Hosting: [Cloud Run](https://cloud.google.com/run?hl=en)
+
 ## Setup
 
 以下の環境変数を定義した`.env`を作成します（`direnv`を利用している場合は`.envrc`に`dotenv`のみを記載します）:
@@ -25,7 +29,7 @@ bun install
 ローカルサーバーを起動します:
 
 ```sh
-bun a dev
+bun run dev
 ```
 
 [ngrok](https://dashboard.ngrok.com/)を使ってローカルホストをhttps URLとしてプロキシし、Webhookで叩けるようにします。ngrokは開発者がローカルの開発サーバー（localhost）をインターネットに公開することを可能にするトンネリング/リバース・プロキシツールです。
@@ -41,12 +45,12 @@ ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_
 
 ```mermaid
 sequenceDiagram
-    participant Smartphone
+    participant Mobile
     participant Twilio
     participant Server
     participant OpenAI
 
-    Smartphone->>Twilio: Call Twilio Phone Number
+    Mobile->>Twilio: Call Twilio Phone Number
     activate Twilio
     Twilio->>Server: HTTP POST /incoming-call (Webhook)
     activate Server
@@ -68,9 +72,9 @@ sequenceDiagram
     end
     Server-->>Twilio:  Close WebSocket Connection
     deactivate Server
-    Twilio-->>Smartphone: Play Audio Response
+    Twilio-->>Mobile: Play Audio Response
 
-    Twilio-->>Smartphone: Disconnect Call
+    Twilio-->>Mobile: Disconnect Call
 ```
 
 ### 処理の流れ
@@ -82,13 +86,12 @@ sequenceDiagram
     - `<Connect><Stream>` の検出: Twilio は`<Connect>`の中に`<Stream>`タグを見つけ、`<Stream>` 動詞の url 属性で指定された URL にWebSocket接続
 1. WebSocket 接続が成功すると、Twilio は通話中の音声データを継続的に WebSocket で`<Stream>`で指定したURLにメッセージを送信
 1. Twilioから受け取った音声データをOpenAI Realtime APIで処理し返答用の音声データを取得
-1. 返答用音声データをTwiML形式に変換することで、音声データが流れてくる度に自動応答が発話される（以下ループ）
+1. 返答用音声データをbase64→TwiMLの形式に変換し、音声データが流れてくる度に自動応答が発話される（以下ループ）
 1. 通話が終了するか TwiML で終了指示があるとWebSocket接続は切れ通話は終了
 
 ## WebSocketの動作確認方法
 
-PostmanでWebSocketリクエストを試すことができます:
-ref. [Send WebSocket requests with Postman | Postman Docs](https://learning.postman.com/docs/sending-requests/websocket/websocket-overview/)
+PostmanでWebSocketリクエストを試すことができます: [Send WebSocket requests with Postman | Postman Docs](https://learning.postman.com/docs/sending-requests/websocket/websocket-overview/)
 
 ```bash
 ws://localhost:3000/ws
