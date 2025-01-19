@@ -9,6 +9,10 @@ const app = new Hono()
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>()
 
+app.get('/', (c) => {
+  return c.json({ message: 'Hello, world!' })
+})
+
 // リクエストを受けてTwilioを使って電話をかけるOutgoingのエンドポイント
 app.post('/outgoing-call', async (c) => {
   console.log('Outgoing call request received')

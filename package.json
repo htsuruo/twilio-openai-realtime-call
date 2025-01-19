@@ -1,7 +1,10 @@
 {
   "name": "twilio-openai-realtime-call",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "env-to-yaml": "bun run scripts/env-to-yaml.ts .env",
+    "build": "bun build src/index.ts --target bun --outdir build --minify",
+    "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
     "hono": "^4.6.16",
