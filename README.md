@@ -4,13 +4,7 @@
 
 ## Setup
 
-To install dependencies:
-
-```sh
-bun install
-```
-
-以下の環境変数を定義した`.env`を作成します（`direnv`を利用している場合は`.envrc`に`dotenv`のみを記載します）。
+以下の環境変数を定義した`.env`を作成します（`direnv`を利用している場合は`.envrc`に`dotenv`のみを記載します）:
 
 ```language
 TWILIO_ACCOUNT_SID="YOUR_ACCOUNT_SID"
@@ -18,6 +12,12 @@ TWILIO_AUTH_TOKEN="YOUR_AUTH_TOKEN"
 OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 TO_PHONE_NUMBER="YOUR_TO_PHONE_NUMBER"
 FROM_PHONE_NUMBER="YOUR_FROM_PHONE_NUMBER"
+```
+
+To install dependencies:
+
+```sh
+bun install
 ```
 
 ## Development
@@ -107,7 +107,7 @@ WebSocketの接続が確立している状態（`onopen`な状態）であれば
 
 [KDDIが2023年に代理店契約終了した](https://kwcplus.kddi-web.com/notice/termination-of-serviceprovision)ことにより色々と使いづらくなってしまった見たい。Twilio API使ってアプリケーション開発する際に利用する[Programmable Voice](https://www.twilio.com/docs/voice)だが、Outbound/Inboundそれぞれで価格表が公開されている。
 
-参考までに日本国内のスマートフォンで080,090番号を使ってOutbound(Outgoing Call)をすると、1分あたり$28と高額請求される。Twilioの発信元は米国とスゥエーデンあたりしか選べる国際ローミングなどの追加料金がかかっているのかもしれない。
+参考までに日本国内のスマートフォンで080,090番号を使ってOutbound(Outgoing Call)をすると、1分あたり28円と請求費用が高いので注意。Twilioの発信元は米国とスゥエーデンあたりしか選べる国際ローミングなどの追加料金がかかっているのかも(?)。
 ![Image](https://github.com/user-attachments/assets/ae48b9ce-4db9-4ba0-9b95-4d0f00142784)
 
 実際、累計60分の通話で$28 *60 = 1,680円（1USD≒156円換算）の請求が発生した。
