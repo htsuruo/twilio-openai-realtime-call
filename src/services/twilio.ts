@@ -17,7 +17,7 @@ class TwilioService {
   private static _instance: TwilioService | undefined
 
   async createCall(to: string): Promise<CallInstance> {
-    const from = process.env.TO_PHONE_NUMBER
+    const from = process.env.FROM_PHONE_NUMBER
     if (!from || !to) {
       throw new Error(
         'FROM_PHONE_NUMBER and PHONE_NUMBER must be set in the environment'

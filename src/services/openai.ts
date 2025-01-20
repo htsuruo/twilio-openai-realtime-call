@@ -1,5 +1,5 @@
 import WebSocket from 'ws'
-import { SYSTEM_MESSAGE } from './prompt'
+import { SYSTEM_MESSAGE } from '../prompt'
 
 class OpenAIWebSocket {
   private readonly ws: WebSocket

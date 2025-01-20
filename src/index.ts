@@ -1,12 +1,12 @@
-import type { ServerWebSocket } from 'bun'
+import { ServerWebSocket } from 'bun'
 import { Hono } from 'hono'
 import { createBunWebSocket } from 'hono/bun'
+
+import OpenAIWebSocket from './services/openai'
+import TwilioService from './services/twilio'
 import type { OutgoingRequestBody } from './types'
 
-import OpenAIWebSocket from './openai'
-import TwilioService from './twilio'
 const app = new Hono()
-
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>()
 
 app.get('/', (c) => {
