@@ -11,6 +11,7 @@
 - 指定のエンドポイント（`/outgoint-call`）を叩くことでTwilioから通話がかかる
 - 会話はOpenAI Realtime APIでプロンプトに従って電話口で対話
 - Function callingにより発話者の終了の合図でTwilio APIを叩き通話が終了する
+- 通話終了後に会話ログがコンソールに出力される
 
 ## Setup
 

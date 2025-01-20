@@ -1,13 +1,9 @@
-import { ServerWebSocket } from 'bun'
-import { WSContext } from 'hono/ws'
 import WebSocket from 'ws'
-import { SYSTEM_MESSAGE } from '../prompt'
+import { SYSTEM_MESSAGE } from './prompt'
 
 class OpenAIWebSocket {
   private readonly ws: WebSocket
   private readonly END_CALL_NAME = 'end_call'
-
-  private conversationLogs: string = ''
 
   private readonly LOG_EVENT_TYPES = [
     'response.content.done',
@@ -17,7 +13,6 @@ class OpenAIWebSocket {
     'input_audio_buffer.speech_stopped',
     'input_audio_buffer.speech_started',
     'session.created',
-    'session.updated',
     'response.create',
   ]
 
@@ -45,8 +40,8 @@ class OpenAIWebSocket {
           output_audio_format: 'g711_ulaw',
           voice: 'coral',
           instructions: SYSTEM_MESSAGE,
-          input_audio_transcription: { model: 'whisper-1' },
-          temperature: 0.6,
+          // input_audio_transcription: { model: 'whisper-1' },
+          temperature: 0.8,
           tools: [
             {
               type: 'function',
@@ -88,43 +83,38 @@ class OpenAIWebSocket {
     if (this.isOpen()) {
       this.ws.close()
       console.log('Closed connection to OpenAI Realtime API')
-      console.log(`==Conversation Logs==\n${this.conversationLogs}\n===`)
     }
   }
 
-  onmessage(param: {
-    streamSid: string
-    twilioWs: WSContext<ServerWebSocket>
+  onmessage(
+    streamSid: string,
+    callback: (audioDelta: string) => void,
     endCallFunc: () => Promise<void>
-  }) {
-    const { streamSid, twilioWs, endCallFunc } = param
-
+  ) {
     this.ws.on('message', async (data) => {
       try {
         const response = JSON.parse(data as any)
         if (this.LOG_EVENT_TYPES.includes(response.type)) {
           console.log(`Received event: ${response.type}`, response)
         }
-        // 会話ログを保持
-        this.handleAudioTranscription(response)
-
-        // OpenAIからの音声データをTwilioに転送
+        if (response.type === 'session.updated') {
+          console.log('Session updated successfully:', response)
+        }
         if (response.type === 'response.audio.delta' && response.delta) {
           const audioDelta = this.convertToTwilioAudio(
             streamSid,
             Buffer.from(response.delta, 'base64').toString('base64')
           )
-          twilioWs.send(audioDelta)
+          callback(audioDelta)
         }
-
-        // 発話者の会話を検知したら割り込んで前の発話を停止させる
-        if (response.type === 'input_audio_buffer.speech_started') {
-          console.log('Speech started')
-          // Twilioにメッセージクリアを要求
-          // ref. https://www.twilio.com/docs/voice/media-streams/websocket-messages#send-a-clear-message
-          twilioWs.send(JSON.stringify({ event: 'clear', streamSid }))
-          this.ws.send(JSON.stringify({ type: 'response.cancel' }))
-        }
+        // トランスクリプトを取得（事前にsession.updateでinput_audio_transcriptionを指定が必要）
+        // ref. https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/input_audio_transcription
+        // if (
+        //   response.type ===
+        //   'conversation.item.input_audio_transcription.completed'
+        // ) {
+        //   console.log(`transcription: ${response.transcription}`)
+        // }
         if (response.type === 'response.output_item.done') {
           const item = response.item
           console.log(
@@ -162,26 +152,6 @@ class OpenAIWebSocket {
         )
       }
     })
-  }
-
-  // トランスクリプトを取得（事前にsession.updateでinput_audio_transcriptionを指定が必要）
-  // ref. https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/input_audio_transcription
-  private handleAudioTranscription(response: any) {
-    // 入力音声のトランスクリプト
-    if (
-      response.type === 'conversation.item.input_audio_transcription.completed'
-    ) {
-      console.log(
-        `conversation.item.input_audio_transcription.completed: ${response.transcript}`
-      )
-      this.conversationLogs += `user: ${response.transcript}`
-    }
-
-    // 出力音声のトランスクリプト
-    if (response.type === 'response.audio_transcript.done') {
-      console.log(`response.audio_transcript.done: ${response.transcript}`)
-      this.conversationLogs += `assistant: ${response.transcript}\n`
-    }
   }
 
   /**
