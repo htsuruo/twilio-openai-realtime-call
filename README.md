@@ -132,9 +132,62 @@ bun run deploy
 
 実際、累計60分の通話で$28 *60 = 1,680円（1USD≒156円換算）の請求が発生した。
 
-## onMessageで受け取るTwilioの音声インプットデータの形式例
+## Media Streamsの仕様メモ
+
+[Media Streams Overview | Twilio](https://www.twilio.com/docs/voice/media-streams)
+
+TwilioのMedia StreamsはTwiMLで指定したWebSocket URLに対して音声ローデータをストリーミングしてくれる機能。単方向（[Unidirectional Media Streams](https://www.twilio.com/docs/voice/media-streams#unidirectional-media-streams)）と双方向（[Bidirectional Media Streams](https://www.twilio.com/docs/voice/media-streams#bidirectional-media-streams)）の2種類がある。
+
+- 単方向（Unidirectional Media Streams）: `<Start><Stream>`
+- 双方向（Bidirectional Media Streams）: `<Connect><Stream>`
+
+### 発行されるTwiMLの例
+
+```yaml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+ <Say language="ja-JP" voice="Polly.Mizuki">こんにちは。オペレーターにお繋ぎします。</Say>
+ <Connect>
+  <Stream url="wss://[YOUR_DOMAIN]/ws">
+    <Parameter name="customerId" value="12345"/>
+  </Stream>
+ </Connect>
+ <Say language="ja-JP" voice="Polly.Mizuki">以上でオペレーターとの通話を終了します。</Say>
+</Response>
+```
+
+### onMessageで受け取るTwilioのデータの形式例
 
 ref. [Media Streams - WebSocket Messages | Twilio](https://www.twilio.com/docs/voice/media-streams/websocket-messages)
+
+`start`イベントの例:
+
+※`customParameters`は`start`イベントでしか受け取れない点に注意
+
+```yaml
+{
+  event: "start",
+  sequenceNumber: "1",
+  start: {
+    accountSid: "xxx",
+    streamSid: "MZ750f90a3ac2a60f9848fe3c660b48544",
+    callSid: "CAfb3a8220146265a21ede79577534cee3",
+    tracks: [ "inbound" ],
+    mediaFormat: {
+      encoding: "audio/x-mulaw",
+      sampleRate: 8000,
+      channels: 1,
+    },
+    # TwiMLでパラメーターをセットしておくとここに入ってくる
+    customParameters: {
+      customerId: "12345",
+    },
+  },
+  streamSid: "MZ750f90a3ac2a60f9848fe3c660b48544",
+}
+```
+
+`media`イベントの例:
 
 ```yaml
 {
@@ -146,7 +199,7 @@ ref. [Media Streams - WebSocket Messages | Twilio](https://www.twilio.com/docs/v
     "timestamp": "18553",
     "payload": "fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fg=="
   },
-  "streamSid": "MZ893cd917cb56661c1c498970e1fe3e08"
+  "streamSid": "MZ893cd917cb56661c1c498970e1fe3e08",
 }
 
 ```

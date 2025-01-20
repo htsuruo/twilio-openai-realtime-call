@@ -50,8 +50,11 @@ app.get(
               openAiWs.appendAudioMessage(data.media.payload)
               break
             case 'start':
-              const { streamSid, callSid } = data.start
+              const { streamSid, callSid, customParameters } = data.start
               console.log('Incoming stream has started', streamSid)
+              console.log(
+                `customParameters: ${JSON.stringify(customParameters)}`
+              )
               openAiWs.onmessage(
                 streamSid!,
                 (audioDelta) => {

@@ -1,10 +1,11 @@
 import twilio from 'twilio'
 import { CallInstance } from 'twilio/lib/rest/api/v2010/account/call'
-import VoiceResponse from 'twilio/lib/twiml/VoiceResponse'
+import VoiceResponse, {
+  ParameterAttributes,
+} from 'twilio/lib/twiml/VoiceResponse'
 
 class TwilioService {
   private readonly client: twilio.Twilio
-  // TODO(htsuruo): ENVで切り替える
 
   constructor() {
     const accountSid = process.env.TWILIO_ACCOUNT_SID
@@ -27,7 +28,10 @@ class TwilioService {
     return this.client.calls.create({
       from,
       to,
-      twiml: this.createTwiml(),
+      twiml: this.createTwiml([
+        { name: 'customerId', value: '123' },
+        { name: 'foo', value: 'bar' },
+      ]),
       record: true,
     })
   }
@@ -39,15 +43,19 @@ class TwilioService {
    *
    * @see https://www.twilio.com/docs/voice/twiml
    */
-  createTwiml(): VoiceResponse {
+  createTwiml(customParameters?: ParameterAttributes[]): VoiceResponse {
     const response = new twilio.twiml.VoiceResponse()
     // 通話開始のシステムメッセージ
     this.setSystemMessage(response, 'こんにちは。オペレーターにお繋ぎします。')
     const connect = response.connect()
-    connect.stream({
+    const stream = connect.stream({
       url: `wss://${process.env.DOMAIN}/ws`,
     })
-    // 通話終了のシステムメッセージ
+    if (customParameters) {
+      for (const p of customParameters) {
+        stream.parameter({ name: p.name, value: p.value })
+      }
+    }
     this.setSystemMessage(response, '以上でオペレーターとの通話を終了します。')
     console.log(response.toString())
     return response
