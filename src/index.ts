@@ -1,6 +1,7 @@
 import type { ServerWebSocket } from 'bun'
 import { Hono } from 'hono'
 import { createBunWebSocket } from 'hono/bun'
+import type { OutgoingRequestBody } from './types'
 
 import OpenAIWebSocket from './openai'
 import TwilioService from './twilio'
@@ -15,7 +16,9 @@ app.get('/', (c) => {
 // リクエストを受けてTwilioを使って電話をかけるOutgoingのエンドポイント
 app.post('/outgoing-call', async (c) => {
   console.log('Outgoing call request received')
-  const call = await TwilioService.instance.createCall()
+  const json = (await c.req.json()) as OutgoingRequestBody
+  console.dir(json)
+  const call = await TwilioService.instance.createCall(json.phoneNumber)
   return c.json({ callSid: call.sid })
 })
 

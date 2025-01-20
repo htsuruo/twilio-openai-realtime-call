@@ -41,6 +41,18 @@ ngrok http --domain=gladly-discrete-hound.ngrok-free.app http://localhost:3000
 
 ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_taiki/articles/ngrok_domain)
 
+## Outgoing Call
+
+以下のcURLリクエストでTwilioから着信を受け取ることができます:
+
+```bash
+curl --location 'http://localhost:3000/outgoing-call' \
+--header 'Content-Type: application/json' \
+--data '{
+    "phoneNumber": "+819041296842"
+}'
+```
+
 ## Sequence Diagram
 
 ```mermaid
