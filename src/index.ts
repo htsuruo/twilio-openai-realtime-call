@@ -55,23 +55,16 @@ app.get(
               console.log(
                 `customParameters: ${JSON.stringify(customParameters)}`
               )
-              openAiWs.onmessage(
-                streamSid!,
-                (audioDelta) => {
-                  ws.send(audioDelta)
-                },
-                async () => {
+              openAiWs.onmessage({
+                streamSid,
+                twilioWs: ws,
+                endCallFunc: async () => {
                   const success = await TwilioService.instance.endCall(callSid)
                   if (success) {
                     ws.close()
                   }
                 },
-                () => {
-                  // Twilioにメッセージクリアを要求
-                  // ref. https://www.twilio.com/docs/voice/media-streams/websocket-messages#send-a-clear-message
-                  ws.send(JSON.stringify({ event: 'clear', streamSid }))
-                }
-              )
+              })
               break
             default:
               console.log('Received non-media event:', data.event)

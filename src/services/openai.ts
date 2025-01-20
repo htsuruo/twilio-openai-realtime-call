@@ -1,3 +1,5 @@
+import { ServerWebSocket } from 'bun'
+import { WSContext } from 'hono/ws'
 import WebSocket from 'ws'
 import { SYSTEM_MESSAGE } from '../prompt'
 
@@ -13,6 +15,7 @@ class OpenAIWebSocket {
     'input_audio_buffer.speech_stopped',
     'input_audio_buffer.speech_started',
     'session.created',
+    'session.updated',
     'response.create',
   ]
 
@@ -86,28 +89,29 @@ class OpenAIWebSocket {
     }
   }
 
-  onmessage(
-    streamSid: string,
-    callback: (audioDelta: string) => void,
-    endCallFunc: () => Promise<void>,
-    interruptFunc: () => void
-  ) {
+  onmessage(param: {
+    streamSid: string
+    twilioWs: WSContext<ServerWebSocket>
+    endCallFunc: () => Promise<void>
+  }) {
+    const { streamSid, twilioWs, endCallFunc } = param
+
     this.ws.on('message', async (data) => {
       try {
         const response = JSON.parse(data as any)
         if (this.LOG_EVENT_TYPES.includes(response.type)) {
           console.log(`Received event: ${response.type}`, response)
         }
-        if (response.type === 'session.updated') {
-          console.log('Session updated successfully:', response)
-        }
+
+        // OpenAIからの音声データをTwilioに転送
         if (response.type === 'response.audio.delta' && response.delta) {
           const audioDelta = this.convertToTwilioAudio(
             streamSid,
             Buffer.from(response.delta, 'base64').toString('base64')
           )
-          callback(audioDelta)
+          twilioWs.send(audioDelta)
         }
+
         // トランスクリプトを取得（事前にsession.updateでinput_audio_transcriptionを指定が必要）
         // ref. https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/input_audio_transcription
         // if (
@@ -116,10 +120,13 @@ class OpenAIWebSocket {
         // ) {
         //   console.log(`transcription: ${response.transcription}`)
         // }
+
         // 発話者の会話を検知したら割り込んで前の発話を停止させる
         if (response.type === 'input_audio_buffer.speech_started') {
           console.log('Speech started')
-          interruptFunc()
+          // Twilioにメッセージクリアを要求
+          // ref. https://www.twilio.com/docs/voice/media-streams/websocket-messages#send-a-clear-message
+          twilioWs.send(JSON.stringify({ event: 'clear', streamSid }))
           this.ws.send(JSON.stringify({ type: 'response.cancel' }))
         }
         if (response.type === 'response.output_item.done') {
@@ -160,6 +167,8 @@ class OpenAIWebSocket {
       }
     })
   }
+
+  transferToTwilioStream(message: string) {}
 
   /**
    * Converts the given stream SID and payload into a Twilio audio response.
