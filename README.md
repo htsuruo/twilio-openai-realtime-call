@@ -6,6 +6,12 @@
 - Server Framework: [Hono](https://hono.dev/)
 - Hosting: [Cloud Run](https://cloud.google.com/run?hl=en)
 
+### 主な機能
+
+- 指定のエンドポイント（`/outgoint-call`）を叩くことでTwilioから通話がかかる
+- 会話はOpenAI Realtime APIでプロンプトに従って電話口で対話
+- Function callingにより発話者の終了の合図でTwilio APIを叩き通話が終了する
+
 ## Setup
 
 以下の環境変数を定義した`.env`を作成します（`direnv`を利用している場合は`.envrc`に`dotenv`のみを記載します）:
@@ -41,7 +47,7 @@ ngrok http --domain=gladly-discrete-hound.ngrok-free.app http://localhost:3000
 
 ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_taiki/articles/ngrok_domain)
 
-## Outgoing Call
+### Outgoing Call
 
 以下のcURLリクエストでTwilioから着信を受け取ることができます:
 
