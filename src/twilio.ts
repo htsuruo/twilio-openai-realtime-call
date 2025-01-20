@@ -5,7 +5,6 @@ import VoiceResponse from 'twilio/lib/twiml/VoiceResponse'
 class TwilioService {
   private readonly client: twilio.Twilio
   // TODO(htsuruo): ENVで切り替える
-  private readonly API_DOMAIN = 'gladly-discrete-hound.ngrok-free.app'
 
   constructor() {
     const accountSid = process.env.TWILIO_ACCOUNT_SID
@@ -47,7 +46,7 @@ class TwilioService {
     this.setSystemMessage(response, 'こんにちは。オペレーターにお繋ぎします。')
     const connect = response.connect()
     connect.stream({
-      url: `wss://${this.API_DOMAIN}/ws`,
+      url: `wss://${process.env.DOMAIN}/ws`,
     })
     // 通話終了のシステムメッセージ
     this.setSystemMessage(response, '以上でオペレーターとの通話を終了します。')
