@@ -37,6 +37,7 @@ app.get(
     console.log('Client connected')
 
     const openAiWs = new OpenAIWebSocket()
+    let activeCallSid: string | null = null
 
     return {
       onOpen: (event) => {
@@ -51,6 +52,7 @@ app.get(
               break
             case 'start':
               const { streamSid, callSid, customParameters } = data.start
+              activeCallSid = callSid
               console.log('Incoming stream has started', streamSid)
               console.log(
                 `customParameters: ${JSON.stringify(customParameters)}`
@@ -75,7 +77,7 @@ app.get(
         }
       },
       onClose: (event) => {
-        openAiWs.close()
+        openAiWs.close(activeCallSid)
         console.log(`Client disconnected:  ${event.type}`)
       },
     }

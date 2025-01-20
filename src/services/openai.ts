@@ -84,11 +84,13 @@ class OpenAIWebSocket {
     }
   }
 
-  close() {
+  close(callSid: string | null) {
     if (this.isOpen()) {
       this.ws.close()
       console.log('Closed connection to OpenAI Realtime API')
-      console.log(`==Conversation Logs==\n${this.conversationLogs}\n===`)
+      console.log(
+        `==Conversation Logs(callSid: ${callSid})==\n${this.conversationLogs}\n===`
+      )
     }
   }
 
