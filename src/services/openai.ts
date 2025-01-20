@@ -168,8 +168,6 @@ class OpenAIWebSocket {
     })
   }
 
-  transferToTwilioStream(message: string) {}
-
   /**
    * Converts the given stream SID and payload into a Twilio audio response.
    *
