@@ -49,7 +49,7 @@ ref. [【簡単】ngrokで発行されるURLを固定する](https://zenn.dev/y_
 curl --location 'http://localhost:3000/outgoing-call' \
 --header 'Content-Type: application/json' \
 --data '{
-    "phoneNumber": "+819041296842"
+    "phoneNumber": "+819012345678"
 }'
 ```
 
