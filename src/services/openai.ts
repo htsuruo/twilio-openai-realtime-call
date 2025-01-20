@@ -89,7 +89,8 @@ class OpenAIWebSocket {
   onmessage(
     streamSid: string,
     callback: (audioDelta: string) => void,
-    endCallFunc: () => Promise<void>
+    endCallFunc: () => Promise<void>,
+    interruptFunc: () => void
   ) {
     this.ws.on('message', async (data) => {
       try {
@@ -115,6 +116,12 @@ class OpenAIWebSocket {
         // ) {
         //   console.log(`transcription: ${response.transcription}`)
         // }
+        // 発話者の会話を検知したら割り込んで前の発話を停止させる
+        if (response.type === 'input_audio_buffer.speech_started') {
+          console.log('Speech started')
+          interruptFunc()
+          this.ws.send(JSON.stringify({ type: 'response.cancel' }))
+        }
         if (response.type === 'response.output_item.done') {
           const item = response.item
           console.log(

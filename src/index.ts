@@ -65,6 +65,11 @@ app.get(
                   if (success) {
                     ws.close()
                   }
+                },
+                () => {
+                  // Twilioにメッセージクリアを要求
+                  // ref. https://www.twilio.com/docs/voice/media-streams/websocket-messages#send-a-clear-message
+                  ws.send(JSON.stringify({ event: 'clear', streamSid }))
                 }
               )
               break
